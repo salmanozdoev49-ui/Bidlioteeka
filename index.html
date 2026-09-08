@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Библиотека аниме</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Шапка -->
+    <header class="header">
+        <div class="header-inner">
+            <h1 class="logo">📚 Библиотека аниме</h1>
+            <button id="btnAdd" class="btn btn-burgundy">＋ Добавить аниме</button>
+        </div>
+
+        <!-- Поиск -->
+        <div class="search-wrap">
+            <input type="search" id="searchInput" placeholder="🔎 Поиск по названию...">
+        </div>
+
+        <!-- Фильтры по статусу -->
+        <div class="filters" id="filters">
+            <button class="chip active" data-status="">Все</button>
+            <button class="chip" data-status="Просмотрено">Просмотрено</button>
+            <button class="chip" data-status="Планирую">Планирую</button>
+            <button class="chip" data-status="Закончено">Закончено</button>
+            <button class="chip" data-status="Анонс">Анонс</button>
+            <button class="chip" data-status="Жду продолжение">Жду продолжение</button>
+        </div>
+    </header>
+
+    <!-- Сетка карточек -->
+    <main class="grid" id="grid"></main>
+
+    <!-- Сообщения -->
+    <div class="empty" id="empty" style="display:none;">
+        <p>Ничего не найдено 🙁</p>
+    </div>
+    <div class="empty" id="loading" style="display:none;">
+        <p>Загрузка...</p>
+    </div>
+
+    <!-- ===== Модалка карточки/добавления/редактирования ===== -->
+    <div class="overlay" id="overlay" style="display:none;" onclick="closeModal(event)">
+        <div class="modal" id="modal">
+
+            <button class="close-btn" id="btnClose" onclick="closeModal()">✕</button>
+
+            <!-- Режим просмотра карточки -->
+            <div id="viewMode">
+                <div id="viewImage" class="modal-image-wrap"></div>
+                <h2 id="viewName"></h2>
+                <span class="badge" id="viewStatus"></span>
+                <div class="view-info">
+                    <p><strong>Название:</strong> <span id="viewName2"></span></p>
+                    <p><strong>Жанр:</strong> <span id="viewGenre"></span></p>
+                    <p><strong>Год:</strong> <span id="viewYear"></span></p>
+                    <p><strong>Озвучка:</strong> <span id="viewVoice"></span></p>
+                    <p><strong>Статус:</strong> <span id="viewStatus2"></span></p>
+                    <p><strong>Описание:</strong></p>
+                    <p class="desc" id="viewDesc"></p>
+                </div>
+                <!-- Кнопка редактировать внизу -->
+                <button id="btnEdit" class="btn btn-burgundy btn-full">✏️ Редактировать</button>
+            </div>
+
+            <!-- Режим добавления/редактирования -->
+            <div id="formMode" style="display:none;">
+                <h2 id="formTitle">Добавить аниме</h2>
+                <input type="hidden" id="editId">
+                <input type="text" id="fName" placeholder="Название *">
+                <input type="text" id="fGenre" placeholder="Жанр">
+                <input type="number" id="fYear" placeholder="Год выпуска">
+                <input type="text" id="fVoice" placeholder="Озвучка">
+                <input type="text" id="fImage" placeholder="URL фото (ссылка)">
+                <select id="fStatus">
+                    <option value="Планирую">Планирую</option>
+                    <option value="Просмотрено">Просмотрено</option>
+                    <option value="Закончено">Закончено</option>
+                    <option value="Анонс">Анонс</option>
+                    <option value="Жду продолжение">Жду продолжение</option>
+                </select>
+                <textarea id="fDesc" placeholder="Описание"></textarea>
+                <button id="btnSave" class="btn btn-emerald btn-full">💾 Сохранить</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Подключение Supabase и логика -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+  </html>
