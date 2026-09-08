@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Библиотека аниме</title>
+<style>
+:root{
+  --bg:#071412;--panel:#0d211d;--panel2:#102a25;--green:#123c33;
+  --burg:#651f35;--burg2:#8a2945;--silver:#c7d0cd;--muted:#8e9d99;
+  --border:rgba(199,208,205,.16);--shadow:0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 20% 0%,#12382f 0,#071412 38%,#050d0b 100%);
+color:var(--silver);font-family:Arial,sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+header{position:sticky;top:0;z-index:20;background:rgba(5,15,13,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 14px 12px}
+.logo{text-align:center;font-size:21px;font-weight:800;letter-spacing:1px;color:#d8dfdd;text-shadow:0 0 16px rgba(180,220,210,.25);margin-bottom:12px}
+.logo span{color:#9eb3ad}
+.controls{display:flex;gap:8px}
+.search{flex:1;min-width:0;background:#0b1d19;border:1px solid var(--border);border-radius:11px;color:#fff;padding:11px 13px;outline:none}
+.search:focus{border-color:#527e72}
+.filter-btn,.add-btn,.save-btn,.edit-btn,.close-btn,.delete-btn{border:0;border-radius:11px;padding:10px 13px;color:#fff;font-weight:700}
+.filter-btn{background:var(--green);border:1px solid var(--border);min-width:45px}
+.add-btn{background:linear-gradient(135deg,var(--burg),#421626);white-space:nowrap}
+.filters{display:none;gap:7px;flex-wrap:wrap;padding-top:10px}
+.filters.show{display:flex}
+.filter{background:#0d211d;color:var(--silver);border:1px solid var(--border);border-radius:20px;padding:7px 11px;font-size:12px}
+.filter.active{background:var(--burg);border-color:#9b3a57;color:white}
+main{max-width:1100px;margin:auto;padding:18px 12px 80px}
+.info{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{background:linear-gradient(160deg,rgba(16,42,37,.98),rgba(8,23,20,.98));border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);transition:.2s}
+.card:active{transform:scale(.98)}
+.poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:#10221f;display:block}
+.card-body{padding:10px}
+.title{font-weight:800;color:#edf2f0;font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{font-size:11px;color:var(--muted);margin-top:6px}
+.status{display:inline-block;margin-top:7px;padding:5px 7px;border-radius:8px;background:rgba(101,31,53,.75);color:#f0cbd5;font-size:10px;font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:50px 15px}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.7);display:none;align-items:flex-end}
+.overlay.show{display:flex}
+.modal{width:100%;max-height:94vh;overflow:auto;background:#091814;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:17px;box-shadow:0 -15px 45px rgba(0,0,0,.5)}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.overlay{align-items:center;justify-content:center}.modal{width:min(600px,94vw);border-radius:18px}}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal h2{margin:0;color:#edf2f0;font-size:20px}
+.close-btn{background:#172b27;padding:7px 11px}
+.detail{display:grid;grid-template-columns:125px 1fr;gap:15px}
+.detail .poster{border-radius:12px}
+.detail-info p{margin:0 0 9px;font-size:13px;line-height:1.4}
+.label{color:var(--muted)}
+.desc{grid-column:1/-1;color:#c2ceca;font-size:14px;line-height:1.55}
+.actions{display:flex;gap:8px;margin-top:15px}
+.edit-btn{background:var(--green);flex:1}
+.delete-btn{background:#541b2e}
+.form{display:grid;gap:10px}
+.form label{font-size:12px;color:var(--muted)}
+.form input,.form textarea,.form select{width:100%;background:#0b211c;border:1px solid var(--border);border-radius:10px;color:#eef3f1;padding:11px;outline:none}
+.form textarea{min-height:120px;resize:vertical}
+.save-btn{background:linear-gradient(135deg,#1c5849,#123c33);width:100%;padding:12px}
+.hint{font-size:11px;color:var(--muted);line-height:1.4}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);background:#162e28;color:white;padding:11px 15px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:100;border:1px solid var(--border)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">✦ БИБЛИОТЕКА <span>АНИМЕ</span></div>
+  <div class="controls">
+    <input id="search" class="search" placeholder="🔎  Поиск по названию..." autocomplete="off">
+    <button class="filter-btn" id="filterBtn">☰</button>
+    <button class="add-btn" id="addBtn">＋</button>
+  </div>
+  <div class="filters" id="filters"></div>
+</header>
+
+<main>
+  <div class="info"><span id="count">Загрузка...</span><span id="connection"></span></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">Аниме не найдено.</div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Аниме</h2>
+      <button class="close-btn" id="closeBtn">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/*
+  ==============================
+  НАСТРОЙКА SUPABASE
+  ==============================
+  ВСТАВЬ СЮДА СВОИ ДАННЫЕ SUPABASE.
+*/
+const SUPABASE_URL = "ВСТАВЬ_СЮДА_URL_SUPABASE";
+const SUPABASE_KEY = "ВСТАВЬ_СЮДА_PUBLISHABLE_КЛЮЧ";
+
+const TABLE = "anime";
+const statuses = ["Все","Просмотрено","Планирую","Закончено","Анонс","Жду продолжение"];
+
+let anime = [];
+let activeStatus = "Все";
+let editingId = null;
+
+const $ = id => document.getElementById(id);
+const grid = $("grid"), empty = $("empty"), overlay = $("overlay");
+
+function configured(){
+  return SUPABASE_URL.startsWith("http") && !SUPABASE_URL.includes("ВСТАВЬ_") &&
+         SUPABASE_KEY && !SUPABASE_KEY.includes("ВСТАВЬ_");
+}
+
+function headers(){
+  return {
+    "apikey": SUPABASE_KEY,
+    "Authorization": "Bearer " + SUPABASE_KEY,
+    "Content-Type": "application/json"
+  };
+}
+
+function esc(v=""){
+  return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+
+function toast(msg){
+  $("toast").textContent=msg;
+  $("toast").classList.add("show");
+  setTimeout(()=>$("toast").classList.remove("show"),2500);
+}
+
+async function loadAnime(){
+  if(!configured()){
+    $("connection").textContent="⚠ Supabase не настроен";
+    anime=[];
+    render();
+    return;
+  }
+  try{
+    $("connection").textContent="Загрузка...";
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=created_at.desc`,{headers:headers()});
+    if(!r.ok) throw new Error(await r.text());
+    anime=await r.json();
+    $("connection").textContent="● Подключено";
+    render();
+  }catch(e){
+    console.error(e);
+    $("connection").textContent="⚠ Ошибка Supabase";
+    toast("Не удалось загрузить каталог");
+  }
+}
+
+function render(){
+  const q=$("search").value.trim().toLowerCase();
+  const list=anime.filter(a=>{
+    const title=(a.title||"").toLowerCase();
+    return (!q || title.includes(q)) && (activeStatus==="Все" || a.status===activeStatus);
+  });
+  $("count").textContent=`Аниме: ${list.length}`;
+  grid.innerHTML=list.map(cardHTML).join("");
+  empty.style.display=list.length?"none":"block";
+}
+
+function cardHTML(a){
+  const poster=esc(a.poster||"https://placehold.co/600x900/10221f/c7d0cd?text=NO+POSTER");
+  return `<article class="card" onclick="openDetails('${esc(a.id)}')">
+    <img class="poster" src="${poster}" alt="${esc(a.title)}" onerror="this.src='https://placehold.co/600x900/10221f/c7d0cd?text=NO+POSTER'">
+    <div class="card-body">
+      <div class="title">${esc(a.title||"Без названия")}</div>
+      <div class="meta">${esc(a.year||"—")} · ${esc(a.dub||"Озвучка не указана")}</div>
+      <span class="status">${esc(a.status||"Без статуса")}</span>
+    </div>
+  </article>`;
+}
+
+function openModal(title,content){
+  $("modalTitle").textContent=title;
+  $("modalContent").innerHTML=content;
+  overlay.classList.add("show");
+}
+
+function closeModal(){overlay.classList.remove("show");editingId=null}
+
+function openDetails(id){
+  const a=anime.find(x=>String(x.id)===String(id));
+  if(!a)return;
+  const genres=Array.isArray(a.genres)?a.genres.join(", "):(a.genres||"—");
+  openModal(a.title||"Аниме",`
+    <div class="detail">
+      <img class="poster" src="${esc(a.poster||"https://placehold.co/600x900/10221f/c7d0cd?text=NO+POSTER")}" onerror="this.src='https://placehold.co/600x900/10221f/c7d0cd?text=NO+POSTER'">
+      <div class="detail-info">
+        <p><span class="label">Жанр:</span><br>${esc(genres)}</p>
+        <p><span class="label">Год:</span><br>${esc(a.year||"—")}</p>
+        <p><span class="label">Озвучка:</span><br>${esc(a.dub||"—")}</p>
+        <p><span class="label">Статус:</span><br>${esc(a.status||"—")}</p>
+      </div>
+      <div class="desc"><span class="label">Описание:</span><br>${esc(a.description||"Описание отсутствует.")}</div>
+    </div>
+    <div class="actions">
+      <button class="edit-btn" onclick="openForm('${esc(a.id)}')">✏️ Редактировать</button>
+      <button class="delete-btn" onclick="deleteAnime('${esc(a.id)}')">🗑</button>
+    </div>
+  `);
+}
+
+function openForm(id=null){
+  editingId=id;
+  const a=id?anime.find(x=>String(x.id)===String(id)):{};
+  openModal(id?"Редактировать аниме":"Добавить аниме",`
+    <form class="form" onsubmit="saveAnime(event)">
+      <div><label>Название</label><input id="f_title" required value="${esc(a.title||"")}"></div>
+      <div><label>URL постера</label><input id="f_poster" placeholder="https://..." value="${esc(a.poster||"")}"></div>
+      <div><label>Жанр</label><input id="f_genres" placeholder="Экшен, Фэнтези, Комедия" value="${esc(Array.isArray(a.genres)?a.genres.join(", "):(a.genres||""))}"></div>
+      <div><label>Год</label><input id="f_year" type="number" min="1900" max="2100" value="${esc(a.year||"")}"></div>
+      <div><label>Озвучка</label><input id="f_dub" placeholder="AniLibria, Dream Cast..." value="${esc(a.dub||"")}"></div>
+      <div><label>Статус</label>
+        <select id="f_status">${statuses.slice(1).map(s=>`<option ${s===(a.status||"Планирую")?"selected":""}>${s}</option>`).join("")}</select>
+      </div>
+      <div><label>Описание</label><textarea id="f_description" placeholder="Описание аниме...">${esc(a.description||"")}</textarea></div>
+      <div class="hint">Постер хранится как ссылка на изображение. Саму картинку можно разместить в Supabase Storage или использовать прямую ссылку на изображение.</div>
+      <button class="save-btn" type="submit">💾 ${id?"Сохранить изменения":"Добавить аниме"}</button>
+    </form>
+  `);
+}
+
+async function saveAnime(e){
+  e.preventDefault();
+  if(!configured()){toast("Сначала настрой Supabase в коде");return}
+  const data={
+    title:$("f_title").value.trim(),
+    poster:$("f_poster").value.trim(),
+    genres:$("f_genres").value.trim(),
+    year:$("f_year").value?Number($("f_year").value):null,
+    dub:$("f_dub").value.trim(),
+    status:$("f_status").value,
+    description:$("f_description").value.trim()
+  };
+  try{
+    let r;
+    if(editingId){
+      r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(editingId)}`,{
+        method:"PATCH",headers:{...headers(),"Prefer":"return=representation"},body:JSON.stringify(data)
+      });
+    }else{
+      r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`,{
+        method:"POST",headers:{...headers(),"Prefer":"return=representation"},body:JSON.stringify(data)
+      });
+    }
+    if(!r.ok)throw new Error(await r.text());
+    closeModal();toast(editingId?"Изменения сохранены":"Аниме добавлено");await loadAnime();
+  }catch(err){console.error(err);toast("Ошибка сохранения. Проверь RLS и поля таблицы.");}
+}
+
+async function deleteAnime(id){
+  if(!confirm("Удалить это аниме?"))return;
+  if(!configured())return;
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(id)}`,{method:"DELETE",headers:headers()});
+    if(!r.ok)throw new Error(await r.text());
+    closeModal();toast("Аниме удалено");await loadAnime();
+  }catch(e){console.error(e);toast("Не удалось удалить аниме");}
+}
+
+$("search").addEventListener("input",render);
+$("filterBtn").onclick=()=>$("filters").classList.toggle("show");
+$("addBtn").onclick=()=>openForm();
+$("closeBtn").onclick=closeModal;
+overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal()});
+
+$("filters").innerHTML=statuses.map(s=>`<button class="filter ${s==="Все"?"active":""}" onclick="setStatus('${esc(s)}',this)">${esc(s)}</button>`).join("");
+function setStatus(s,el){
+  activeStatus=s;
+  document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+  render();
+}
+
+loadAnime();
+</script>
+</body>
+</html>
