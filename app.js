@@ -1,7 +1,7 @@
 /* ===== НАСТРОЙКА SUPABASE ===== */
 // Вставь сюда свои ключи из панели Supabase (Project Settings → API)
-const SUPABASE_URL = "https://ВАШ_ПРОЕКТ.supabase.co";
-const SUPABASE_KEY = "ВАШ_PUBLIC_ANON_KEY";
+const SUPABASE_URL = "https://hvmvgrkoazojrpmtbnzj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Jl93cw1rKXPSrzsoRx3mNw_euPMZEvE";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
